@@ -1,8 +1,9 @@
 #include "../include/lws.h"
 #include "../include/queue.h"
 
-extern Queue *queue;
+extern MessageQueue *message_queue;
 extern volatile int interrupted;
+extern const char *symbols[];
 
 struct lws_protocols protocols[] = {
     {
@@ -35,10 +36,7 @@ int callback_ws(struct lws *wsi, enum lws_callback_reasons reason,
             json_object_set_new(root, "op", json_string("subscribe"));
 
             json_t *args = json_array();
-            const char *symbols[] = {
-                "BTC-USDT", "ADA-USDT", "ETH-USDT", "DOGE-USDT",
-                "XRP-USDT", "SOL-USDT", "LTC-USDT", "BNB-USDT"
-            };
+
             for (int i = 0; i < 8; ++i) {
                 json_t *arg = json_object();
                 json_object_set_new(arg, "channel", json_string("trades"));
@@ -61,12 +59,11 @@ int callback_ws(struct lws *wsi, enum lws_callback_reasons reason,
             break;
 
         case LWS_CALLBACK_CLIENT_RECEIVE:
-            printf("[WS] Received: %.*s\n", (int)len, (char *)in);
-            // Add message to queue
+            printf("[WS] Received message: %s\n", (char *)in);
             char *message = malloc(len + 1);
             memcpy(message, in, len);
             message[len] = '\0';
-            queue_push(queue, message);
+            message_queue_push(message_queue, message);
             break;
 
         case LWS_CALLBACK_CLIENT_CONNECTION_ERROR:

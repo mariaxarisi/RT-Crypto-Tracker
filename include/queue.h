@@ -7,10 +7,10 @@
 #include <string.h>
 #include <stddef.h>
 
-typedef struct Queue Queue;
-Queue *queue_create(size_t capacity);
-void queue_destroy(Queue *queue);
-void queue_push(Queue *queue, char *message);
-char *queue_pop(Queue *queue);
+typedef struct MessageQueue MessageQueue;
+MessageQueue *message_queue_create(size_t capacity);
+void message_queue_destroy(MessageQueue *queue);
+void message_queue_push(MessageQueue *queue, char *message);
+char *message_queue_pop(MessageQueue *queue);
 
 #endif // QUEUE_H

@@ -11,5 +11,6 @@ void clear_directory(const char *path);
 void create_empty_file(const char *path);
 void create_files();
 void write_trade(const char *symbol, const char *timestamp, const char *price, const char *size);
+void write_average(const char *symbol, long long timestamp, double average);
 
 #endif // FILE_H

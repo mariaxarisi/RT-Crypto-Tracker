@@ -1,15 +1,18 @@
 #include "../include/parser.h"
 #include "../include/file.h"
 #include "../include/queue.h"
+#include "../include/vector.h"
 
 extern volatile int interrupted;
+extern const char *symbols[];
+extern TradeVector **trades;
 
 void* parse_thread_func(void *arg) {
-    Queue *queue = (Queue *)arg;
+    MessageQueue *message_queue = (MessageQueue *)arg;
     char *message;
 
     while (1) {
-        message = queue_pop(queue);
+        message = message_queue_pop(message_queue);
         if (message == NULL) {
             break;
         }
@@ -48,10 +51,22 @@ void parse_trade(const char *json_msg) {
         ts = json_object_get(trade, "ts");
 
         if (json_is_string(px) && json_is_string(sz) && json_is_string(ts)) {
-            write_trade(json_string_value(instId),
-                        json_string_value(ts),
-                        json_string_value(px),
-                        json_string_value(sz));
+            write_trade(json_string_value(instId), json_string_value(ts),
+                        json_string_value(px), json_string_value(sz));
+
+            int i = 0;
+            for (i = 0; i < 8; ++i) {
+                if (strcmp(json_string_value(instId), symbols[i]) == 0) {
+                    break;
+                }
+            }
+
+            // Push trade data to the trade queue
+            long long timestamp = strtoll(json_string_value(ts), NULL, 10);
+            double price = strtod(json_string_value(px), NULL);
+            double size = strtod(json_string_value(sz), NULL);
+            trade_vector_push(trades[i], timestamp, price, size);
+
         }else {
             fprintf(stderr, "Invalid trade data: %s\n", json_msg);
         }

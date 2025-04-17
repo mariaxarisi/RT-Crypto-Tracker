@@ -1,6 +1,6 @@
 #include "../include/queue.h"
 
-struct Queue {
+struct MessageQueue {
     char **messages;
     size_t capacity;
     size_t head;
@@ -11,8 +11,8 @@ struct Queue {
     pthread_cond_t not_empty;
 };
 
-Queue *queue_create(size_t capacity) {
-    Queue *q = malloc(sizeof(Queue));
+MessageQueue *message_queue_create(size_t capacity) {
+    MessageQueue *q = malloc(sizeof(MessageQueue));
     q->messages = malloc(sizeof(char *) * capacity);
     q->capacity = capacity;
     q->head = q->tail = q->size = 0;
@@ -23,7 +23,7 @@ Queue *queue_create(size_t capacity) {
     return q;
 }
 
-void queue_destroy(Queue *q) {
+void message_queue_destroy(MessageQueue *q) {
     if (!q) return;
 
     pthread_mutex_lock(&q->mutex);
@@ -38,7 +38,7 @@ void queue_destroy(Queue *q) {
     free(q);
 }
 
-void queue_push(Queue *q, char *message) {
+void message_queue_push(MessageQueue *q, char *message) {
     pthread_mutex_lock(&q->mutex);
  
     // Resize if needed
@@ -63,7 +63,7 @@ void queue_push(Queue *q, char *message) {
     pthread_mutex_unlock(&q->mutex);
 }
 
-char *queue_pop(Queue *q) {
+char *message_queue_pop(MessageQueue *q) {
     pthread_mutex_lock(&q->mutex);
     while (q->size == 0) {
         pthread_cond_wait(&q->not_empty, &q->mutex);

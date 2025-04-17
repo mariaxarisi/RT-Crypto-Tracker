@@ -1,12 +1,20 @@
 #include <pthread.h>
 #include <signal.h>
 #include "../include/queue.h"
+#include "../include/vector.h"
 #include "../include/lws.h"
 #include "../include/file.h"
 #include "../include/parser.h"
+#include "../include/average.h"
 
 volatile int interrupted = 0;
-Queue *queue = NULL;
+MessageQueue *message_queue = NULL;
+TradeVector **trades = NULL;
+
+const char *symbols[] = {
+    "BTC-USDT", "ADA-USDT", "ETH-USDT", "DOGE-USDT",
+    "XRP-USDT", "SOL-USDT", "LTC-USDT", "BNB-USDT"
+};
 
 void sigint_handler(int sig) {
     printf("\n[Main] Signal %d received, stopping...\n", sig);
@@ -20,23 +28,33 @@ int main(void) {
     struct lws *wsi = NULL;
 
     create_files();
-    queue = queue_create(1000);
+    message_queue = message_queue_create(200);
+    trades = malloc(sizeof(TradeVector *) * 8);
+    for (int i = 0; i < 8; ++i) {
+        trades[i] = trade_vector_create(1000);
+    }
 
     if (websocket_start(&context, &wsi) != 0) {
         return 1;
     }
 
-    pthread_t ws_thread, parser_thread;
+    pthread_t ws_thread, parser_thread, average_thread;
     pthread_create(&ws_thread, NULL, websocket_thread_func, context);
-    pthread_create(&parser_thread, NULL, parse_thread_func, queue);
+    pthread_create(&parser_thread, NULL, parse_thread_func, message_queue);
+    pthread_create(&average_thread, NULL, average_thread_func, NULL);
 
     // Wait for threads to finish
     pthread_join(ws_thread, NULL);
-    queue_push(queue, NULL); // Signal the parser thread to stop
+    message_queue_push(message_queue, NULL); // Signal the parser thread to stop
     pthread_join(parser_thread, NULL);
+    pthread_join(average_thread, NULL);
 
     websocket_stop(context);
-    queue_destroy(queue);
+    message_queue_destroy(message_queue);
+    for (int i = 0; i < 8; ++i) {
+        trade_vector_destroy(trades[i]);
+    }
+    free(trades);
 
     return 0;
 }
