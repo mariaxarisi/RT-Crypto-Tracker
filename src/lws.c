@@ -63,8 +63,9 @@ int callback_ws(struct lws *wsi, enum lws_callback_reasons reason,
         case LWS_CALLBACK_CLIENT_RECEIVE:
             printf("[WS] Received: %.*s\n", (int)len, (char *)in);
             // Add message to queue
-            char *message = malloc(len);
+            char *message = malloc(len + 1);
             memcpy(message, in, len);
+            message[len] = '\0';
             queue_push(queue, message);
             break;
 

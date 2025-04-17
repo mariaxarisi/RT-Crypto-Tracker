@@ -1,6 +1,10 @@
 #ifndef QUEUE_H
 #define QUEUE_H
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <pthread.h>
+#include <string.h>
 #include <stddef.h>
 
 typedef struct Queue Queue;

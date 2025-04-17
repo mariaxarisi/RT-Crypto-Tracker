@@ -19,15 +19,12 @@ int main(void) {
     struct lws_context *context = NULL;
     struct lws *wsi = NULL;
 
+    create_files();
+    queue = queue_create(1000);
+
     if (websocket_start(&context, &wsi) != 0) {
         return 1;
     }
-
-    // Create files for each symbol
-    create_files();
-
-    // Initialize the message queue
-    queue = queue_create(100);
 
     pthread_t ws_thread, parser_thread;
     pthread_create(&ws_thread, NULL, websocket_thread_func, context);
@@ -35,11 +32,10 @@ int main(void) {
 
     // Wait for threads to finish
     pthread_join(ws_thread, NULL);
+    queue_push(queue, NULL); // Signal the parser thread to stop
     pthread_join(parser_thread, NULL);
 
     websocket_stop(context);
-
-    // Destroy the message queue
     queue_destroy(queue);
 
     return 0;

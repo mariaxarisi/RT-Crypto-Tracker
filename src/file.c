@@ -1,38 +1,59 @@
 #include "../include/file.h"
-#include <sys/stat.h>
-#include <sys/types.h>
 
-void create_files() {
-    // Make sure the logs/trades directory exists
+void ensure_directory_exists(const char *path) {
     struct stat st = {0};
-    if (stat("./logs/trades", &st) == -1) {
-        if (mkdir("./logs", 0755) == -1) {
-            perror("Error creating ../logs");
-        }
-        if (mkdir("./logs/trades", 0755) == -1) {
-            perror("Error creating ./logs/trades");
+    if (stat(path, &st) == -1) {
+        if (mkdir(path, 0755) == -1) {
+            perror("Error creating directory");
         }
     }
-    
+}
+
+void clear_directory(const char *path) {
+    char command[128];
+    snprintf(command, sizeof(command), "rm -f %s/*.csv", path);
+    if (system(command) != 0) {
+        perror("Error deleting old files");
+    }
+}
+
+void create_empty_file(const char *path) {
+    FILE *file = fopen(path, "w");
+    if (file) {
+        fclose(file);
+    } else {
+        perror("Error creating file");
+    }
+}
+
+void create_files() {
+    const char *directories[] = {"./logs", "./logs/trades", "./logs/average", "./logs/pearson"};
     const char *symbols[] = {
         "BTC-USDT", "ADA-USDT", "ETH-USDT", "DOGE-USDT",
         "XRP-USDT", "SOL-USDT", "LTC-USDT", "BNB-USDT"
     };
 
-    if(system("rm -f ./logs/trades/*.csv") != 0){
-        perror("Error deleting old files");
+    // Ensure directories exist
+    for (size_t i = 0; i < sizeof(directories) / sizeof(directories[0]); i++) {
+        ensure_directory_exists(directories[i]);
     }
 
-    for (size_t i = 0; i < sizeof(symbols) / sizeof(symbols[0]); i++) {
-        char filename[64];
-        snprintf(filename, sizeof(filename), "./logs/trades/%s.csv", symbols[i]);
+    // Clear old files
+    for (size_t i = 1; i < sizeof(directories) / sizeof(directories[0]); i++) {
+        clear_directory(directories[i]);
+    }
 
-        FILE *file = fopen(filename, "w");
-        if (file) {
-            fclose(file);
-        } else {
-            perror("Error creating file");
-        }
+    // Create new files
+    for (size_t i = 0; i < sizeof(symbols) / sizeof(symbols[0]); i++) {
+        char path[64];
+        snprintf(path, sizeof(path), "./logs/trades/%s.csv", symbols[i]);
+        create_empty_file(path);
+
+        snprintf(path, sizeof(path), "./logs/average/%s.csv", symbols[i]);
+        create_empty_file(path);
+
+        snprintf(path, sizeof(path), "./logs/pearson/%s.csv", symbols[i]);
+        create_empty_file(path);
     }
 }
 
@@ -44,5 +65,7 @@ void write_trade(const char *symbol, const char *timestamp, const char *price, c
     if (file) {
         fprintf(file, "%s, %s, %s\n", timestamp, price, size);
         fclose(file);
+    }else {
+        fprintf(stderr, "Failed to open file: %s\n", filename);
     }
 }

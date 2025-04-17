@@ -1,7 +1,4 @@
 #include "../include/queue.h"
-#include <stdlib.h>
-#include <pthread.h>
-#include <string.h>
 
 struct Queue {
     char **messages;

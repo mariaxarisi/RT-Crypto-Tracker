@@ -8,12 +8,14 @@ void* parse_thread_func(void *arg) {
     Queue *queue = (Queue *)arg;
     char *message;
 
-    while (!interrupted) {
+    while (1) {
         message = queue_pop(queue);
-        if (message) {
-            parse_trade(message);
-            free(message);
+        if (message == NULL) {
+            break;
         }
+
+        parse_trade(message);
+        free(message);
     }
 
     return NULL;
@@ -24,13 +26,17 @@ void parse_trade(const char *json_msg) {
     json_error_t error;
 
     root = json_loads(json_msg, 0, &error);
-    if (!root) return;
+    if (!root){
+        fprintf(stderr, "Error parsing JSON: %s\n", error.text);
+        return;
+    }
 
     data = json_object_get(root, "data");
     arg = json_object_get(root, "arg");
     instId = json_object_get(arg, "instId");
 
     if (!json_is_array(data) || !json_is_string(instId)) {
+        fprintf(stderr, "Invalid JSON structure: %s\n", json_msg);
         json_decref(root);
         return;
     }
@@ -46,6 +52,8 @@ void parse_trade(const char *json_msg) {
                         json_string_value(ts),
                         json_string_value(px),
                         json_string_value(sz));
+        }else {
+            fprintf(stderr, "Invalid trade data: %s\n", json_msg);
         }
     }
 
