@@ -59,7 +59,7 @@ int callback_ws(struct lws *wsi, enum lws_callback_reasons reason,
             break;
 
         case LWS_CALLBACK_CLIENT_RECEIVE:
-            printf("[WS] Received message: %s\n", (char *)in);
+            //printf("[WS] Received message: %s\n", (char *)in);
             char *message = malloc(len + 1);
             memcpy(message, in, len);
             message[len] = '\0';

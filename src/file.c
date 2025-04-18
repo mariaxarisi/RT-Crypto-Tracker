@@ -80,3 +80,16 @@ void write_average(const char *symbol, long long timestamp, double average) {
         fprintf(stderr, "Failed to open file: %s\n", filename);
     }
 }
+
+void write_pearson(const char *symbol, long long timestamp, const char *related_symbol, double pearson){
+    char filename[64];
+    snprintf(filename, sizeof(filename), "./logs/pearson/%s.csv", symbol);
+
+    FILE *file = fopen(filename, "a");
+    if (file) {
+        fprintf(file, "%lld, %s, %.8f\n", timestamp, related_symbol, pearson);
+        fclose(file);
+    } else {
+        fprintf(stderr, "Failed to open file: %s\n", filename);
+    }
+}

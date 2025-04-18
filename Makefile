@@ -1,6 +1,6 @@
 # Compiler and flags
 CC = gcc
-CFLAGS = -Wall -pthread -ljansson -lwebsockets
+CFLAGS = -Wall -pthread -ljansson -lwebsockets -lm
 
 # Directories
 SRC_DIR = src

@@ -1,19 +1,15 @@
 #include "../include/average.h"
 #include "../include/vector.h"
+#include "../include/buffer.h"
 #include "../include/file.h"
 
 #define SYMBOL_COUNT 8
 
 extern volatile int interrupted;
 extern const char *symbols[];
+extern mv_buffer **mv_buf;
 extern TradeVector **trades;
-
-// Get current timestamp in milliseconds
-long long current_timestamp_ms() {
-    struct timespec ts;
-    clock_gettime(CLOCK_REALTIME, &ts);
-    return (long long)(ts.tv_sec) * 1000 + ts.tv_nsec / 1000000;
-}
+extern long long current_timestamp_ms();
 
 // Calculate moving average from file
 void calculate_moving_average(int i, long long window_end) {
@@ -40,14 +36,13 @@ void calculate_moving_average(int i, long long window_end) {
     if (volume > 0.0) {
         double average = sum / volume;
         write_average(symbols[i], window_end, average);
+        mv_buffer_push(mv_buf[i], window_end, average);
     }
 }
 
 // The thread function
 void* average_thread_func(void *arg) {
-    (void)arg;
-    
-    long long base_time = current_timestamp_ms();
+    long long base_time = *(long long *)arg;
     // Round base_time to the next full minute
     base_time = base_time - (base_time % 60000) + 60000;
 

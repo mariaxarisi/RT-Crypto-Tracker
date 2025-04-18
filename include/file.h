@@ -12,5 +12,6 @@ void create_empty_file(const char *path);
 void create_files();
 void write_trade(const char *symbol, const char *timestamp, const char *price, const char *size);
 void write_average(const char *symbol, long long timestamp, double average);
+void write_pearson(const char *symbol, long long timestamp, const char *related_symbol, double pearson);
 
 #endif // FILE_H
