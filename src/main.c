@@ -1,13 +1,17 @@
 #include <pthread.h>
 #include <signal.h>
-#include "../include/queue.h"
-#include "../include/vector.h"
-#include "../include/lws.h"
-#include "../include/file.h"
-#include "../include/parser.h"
-#include "../include/average.h"
-#include "../include/pearson.h"
+#include "../include/structures/queue.h"
+#include "../include/structures/vector.h"
+#include "../include/structures/file.h"
+#include "../include/structures/buffer.h"
+#include "../include/websocket/lws.h"
+#include "../include/websocket/parser.h"
+#include "../include/metrics/average.h"
+#include "../include/metrics/pearson.h"
 
+const int SYMBOL_COUNT = 8;
+const int BUFFER_SIZE = 67;
+const int ONE_MINUTE_MS = 60000;
 volatile int interrupted = 0;
 MessageQueue *message_queue = NULL;
 TradeVector **trades = NULL;
@@ -38,13 +42,13 @@ int main(void) {
 
     create_files();
     message_queue = message_queue_create(200);
-    trades = malloc(sizeof(TradeVector *) * 8);
-    for (int i = 0; i < 8; ++i) {
+    trades = malloc(sizeof(TradeVector *) * SYMBOL_COUNT);
+    for (int i = 0; i < SYMBOL_COUNT; ++i) {
         trades[i] = trade_vector_create(500);
     }
-    mv_buf = malloc(sizeof(mv_buffer *) * 8);
-    for (int i = 0; i < 8; ++i) {
-        mv_buf[i] = create_mv_buffer(67);
+    mv_buf = malloc(sizeof(mv_buffer *) * SYMBOL_COUNT);
+    for (int i = 0; i < SYMBOL_COUNT; ++i) {
+        mv_buf[i] = create_mv_buffer(BUFFER_SIZE);
     }
 
     if (websocket_start(&context, &wsi) != 0) {
@@ -67,11 +71,11 @@ int main(void) {
 
     websocket_stop(context);
     message_queue_destroy(message_queue);
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < SYMBOL_COUNT; ++i) {
         trade_vector_destroy(trades[i]);
     }
     free(trades);
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < SYMBOL_COUNT; ++i) {
         destroy_mv_buffer(mv_buf[i]);
     }
     free(mv_buf);

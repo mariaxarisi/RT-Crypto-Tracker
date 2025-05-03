@@ -1,5 +1,6 @@
-#include "../include/file.h"
+#include "../../include/structures/file.h"
 
+extern const int SYMBOL_COUNT;
 extern const char *symbols[];
 
 void ensure_directory_exists(const char *path) {
@@ -42,7 +43,7 @@ void create_files() {
     }
 
     // Create new files
-    for (size_t i = 0; i < 8; i++) {
+    for (size_t i = 0; i < SYMBOL_COUNT; i++) {
         char path[64];
         snprintf(path, sizeof(path), "./logs/trades/%s.csv", symbols[i]);
         create_empty_file(path);

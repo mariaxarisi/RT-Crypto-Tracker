@@ -1,8 +1,6 @@
-#include "../include/parser.h"
-#include "../include/file.h"
-#include "../include/queue.h"
-#include "../include/vector.h"
+#include "../../include/websocket/parser.h"
 
+extern const int SYMBOL_COUNT;
 extern volatile int interrupted;
 extern const char *symbols[];
 extern TradeVector **trades;
@@ -39,7 +37,6 @@ void parse_trade(const char *json_msg) {
     instId = json_object_get(arg, "instId");
 
     if (!json_is_array(data) || !json_is_string(instId)) {
-        fprintf(stderr, "Invalid JSON structure: %s\n", json_msg);
         json_decref(root);
         return;
     }
@@ -55,7 +52,7 @@ void parse_trade(const char *json_msg) {
                         json_string_value(px), json_string_value(sz));
 
             int i = 0;
-            for (i = 0; i < 8; ++i) {
+            for (i = 0; i < SYMBOL_COUNT; ++i) {
                 if (strcmp(json_string_value(instId), symbols[i]) == 0) {
                     break;
                 }

@@ -1,4 +1,4 @@
-#include "../include/vector.h"
+#include "../../include/structures/vector.h"
 
 TradeVector *trade_vector_create(size_t capacity) {
     TradeVector *vector = malloc(sizeof(TradeVector));

@@ -6,8 +6,8 @@
 #include <math.h>
 #include <unistd.h>
 #include <pthread.h>
-#include "buffer.h"
-#include "file.h"
+#include "../structures/buffer.h"
+#include "../structures/file.h"
 
 typedef struct maxCorr {
     long long ts;

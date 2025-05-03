@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <jansson.h>
+#include "../structures/queue.h"
 
 typedef struct WsThreadArgs WsThreadArgs;
 void *websocket_thread_func(void *arg);

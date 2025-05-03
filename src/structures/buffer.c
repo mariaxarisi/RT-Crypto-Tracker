@@ -1,4 +1,4 @@
-#include <../include/buffer.h>
+#include <../../include/structures/buffer.h>
 
 mv_buffer* create_mv_buffer(int size) {
     mv_buffer* mv_buf = (mv_buffer*)malloc(sizeof(mv_buffer));

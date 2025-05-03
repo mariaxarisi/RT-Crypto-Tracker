@@ -1,10 +1,7 @@
-#include "../include/average.h"
-#include "../include/vector.h"
-#include "../include/buffer.h"
-#include "../include/file.h"
+#include "../../include/metrics/average.h"
 
-#define SYMBOL_COUNT 8
-
+extern const int SYMBOL_COUNT;
+extern const int ONE_MINUTE_MS;
 extern volatile int interrupted;
 extern const char *symbols[];
 extern mv_buffer **mv_buf;
@@ -14,7 +11,7 @@ extern long long current_timestamp_ms();
 // Calculate moving average from file
 void calculate_moving_average(int i, long long window_end) {
 
-    long long window_start = window_end - 15 * 60 * 1000;
+    long long window_start = window_end - 15 * ONE_MINUTE_MS;
 
     double sum = 0.0;
     double volume = 0.0;
@@ -44,7 +41,7 @@ void calculate_moving_average(int i, long long window_end) {
 void* average_thread_func(void *arg) {
     long long base_time = *(long long *)arg;
     // Round base_time to the next full minute
-    base_time = base_time - (base_time % 60000) + 60000;
+    base_time = base_time - (base_time % ONE_MINUTE_MS) + ONE_MINUTE_MS;
 
     while (!interrupted) {
         long long now = current_timestamp_ms();
@@ -59,7 +56,7 @@ void* average_thread_func(void *arg) {
             calculate_moving_average(i, start);
         }
 
-        base_time += 60000; // Schedule for the next exact minute
+        base_time += ONE_MINUTE_MS; // Schedule for the next exact minute
     }
 
     return NULL;

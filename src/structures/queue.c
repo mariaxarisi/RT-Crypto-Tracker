@@ -1,4 +1,4 @@
-#include "../include/queue.h"
+#include "../../include/structures/queue.h"
 
 struct MessageQueue {
     char **messages;

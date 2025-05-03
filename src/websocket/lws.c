@@ -1,5 +1,4 @@
-#include "../include/lws.h"
-#include "../include/queue.h"
+#include "../../include/websocket/lws.h"
 
 extern MessageQueue *message_queue;
 extern volatile int interrupted;

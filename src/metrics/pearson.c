@@ -1,5 +1,8 @@
-#include "../include/pearson.h"
+#include "../../include/metrics/pearson.h"
 
+extern const int SYMBOL_COUNT;
+extern const int ONE_MINUTE_MS;
+extern const int BUFFER_SIZE;
 extern volatile int interrupted;
 extern char *symbols[];
 extern long long current_timestamp_ms();
@@ -65,8 +68,8 @@ double calculate_pearson_correlation(double *x, double *y, int n) {
 
 void *pearson_thread_func(void *arg){
     long long base_time = *(long long *)arg;
-    base_time = base_time - (base_time % 60000) + 60000; //Next full minute
-    base_time += 8*60000; //8 minutes later
+    base_time = base_time - (base_time % ONE_MINUTE_MS) + ONE_MINUTE_MS; //Next full minute
+    base_time += 8*ONE_MINUTE_MS; //8 minutes later
 
     while (!interrupted) {
         long long now = current_timestamp_ms();
@@ -74,12 +77,12 @@ void *pearson_thread_func(void *arg){
             usleep((base_time - now) * 1000);
         }
 
-        for(int i=0; i<8; i++){
+        for(int i=0; i<SYMBOL_COUNT; i++){
             double resultCorr = -1.0;
             long long resultTs = 0;
             int resultSymbol = i;
 
-            for(int j=0; j<8; j++){
+            for(int j=0; j<SYMBOL_COUNT; j++){
                 if(i == j) continue;
 
                 maxCorr result = max_pearson_correlation(mv_buf[i], mv_buf[j]);
@@ -92,7 +95,7 @@ void *pearson_thread_func(void *arg){
 
             write_pearson(symbols[i], resultTs, symbols[resultSymbol], resultCorr);
         }
-        base_time += 60000;
+        base_time += ONE_MINUTE_MS;
     }
 
     return NULL;

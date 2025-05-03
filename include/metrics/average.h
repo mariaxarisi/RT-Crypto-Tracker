@@ -6,6 +6,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
+#include "../structures/vector.h"
+#include "../structures/buffer.h"
+#include "../structures/file.h"
 
 long long current_timestamp_ms();
 void calculate_moving_average(int i, long long now);
