@@ -6,8 +6,8 @@
 #include <math.h>
 #include <unistd.h>
 #include <pthread.h>
-#include "../structures/buffer.h"
-#include "../structures/file.h"
+#include "buffer.h"
+#include "file.h"
 
 typedef struct maxCorr {
     long long ts;
@@ -15,7 +15,7 @@ typedef struct maxCorr {
 } maxCorr;
 
 void* pearson_thread_func(void *arg);
-maxCorr max_pearson_correlation(mv_buffer *mv_buf1, mv_buffer *mv_buf2);
+maxCorr max_pearson_correlation(MvAvgBuffer *mv_buf1, MvAvgBuffer *mv_buf2);
 double calculate_pearson_correlation(double *x, double *y, int n);
 
 #endif // PEARSON_H

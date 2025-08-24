@@ -1,4 +1,4 @@
-#include "../../include/structures/file.h"
+#include "file.h"
 
 extern const int SYMBOL_COUNT;
 extern const char *symbols[];
@@ -32,17 +32,14 @@ void create_empty_file(const char *path) {
 void create_files() {
     const char *directories[] = {"./logs", "./logs/trades", "./logs/average", "./logs/pearson"};
 
-    // Ensure directories exist
-    for (size_t i = 0; i < sizeof(directories) / sizeof(directories[0]); i++) {
+    for (size_t i = 0; i < 4; i++) {
         ensure_directory_exists(directories[i]);
     }
 
-    // Clear old files
-    for (size_t i = 1; i < sizeof(directories) / sizeof(directories[0]); i++) {
+    for (size_t i = 1; i < 4; i++) {
         clear_directory(directories[i]);
     }
 
-    // Create new files
     for (size_t i = 0; i < SYMBOL_COUNT; i++) {
         char path[64];
         snprintf(path, sizeof(path), "./logs/trades/%s.csv", symbols[i]);

@@ -5,22 +5,22 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-typedef struct mv{
+typedef struct MvAverage{
     long long ts;
     double value;
-} mv;
+} MvAverage;
 
-typedef struct mv_buffer{
-    mv* buffer;
+typedef struct MvAvgBuffer{
+    MvAverage* buffer;
     int max_size;
     int count;
     int start;
     pthread_mutex_t mutex;
-} mv_buffer;
+} MvAvgBuffer;
 
-mv_buffer* create_mv_buffer(int size);
-void destroy_mv_buffer(mv_buffer* mv_buf);
-int mv_buffer_push(mv_buffer* mv_buf, long long ts, double value);
-mv mv_buffer_get(mv_buffer* mv_buf, int index);
+MvAvgBuffer* mvavg_buffer_create(int size);
+void mvavg_buffer_destroy(MvAvgBuffer* mvavg_buf);
+int mvavg_buffer_push(MvAvgBuffer* mvavg_buf, long long ts, double value);
+MvAverage mvavg_buffer_get(MvAvgBuffer* mvavg_buf, int index);
 
 #endif // BUFFER_H

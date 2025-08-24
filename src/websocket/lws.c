@@ -1,8 +1,11 @@
-#include "../../include/websocket/lws.h"
+#include "lws.h"
 
 extern MessageQueue *message_queue;
 extern volatile int interrupted;
+extern struct lws_context *context;
+extern struct lws *wsi;
 extern const char *symbols[];
+volatile int reconnect = 0;
 
 struct lws_protocols protocols[] = {
     {
@@ -14,10 +17,29 @@ struct lws_protocols protocols[] = {
 };
 
 void *websocket_thread_func(void *arg) {
-    struct lws_context *context = arg;
 
     while (!interrupted) {
+        if(reconnect || context == NULL || wsi == NULL) {
+            if(context) {
+                websocket_stop(context);
+                context = NULL;
+                wsi = NULL;
+            }
+
+            printf("[WS] Attempting to reconnect...\n");
+            if (websocket_start(&context, &wsi) != 0) {
+                printf("WebSocket restart failed, retrying in 2 seconds...\n");
+                usleep(2000000);
+                continue;
+            }
+            reconnect = 0;
+        }
+
         lws_service(context, 100);
+    }
+
+    if(context) {
+        websocket_stop(context);
     }
 
     return NULL;
@@ -67,12 +89,12 @@ int callback_ws(struct lws *wsi, enum lws_callback_reasons reason,
 
         case LWS_CALLBACK_CLIENT_CONNECTION_ERROR:
             printf("[WS] Connection error\n");
-            interrupted = 1;
+            reconnect = 1;
             break;
 
         case LWS_CALLBACK_CLIENT_CLOSED:
             printf("[WS] Connection closed\n");
-            interrupted = 1;
+            reconnect = 1;
             break;
 
         default:

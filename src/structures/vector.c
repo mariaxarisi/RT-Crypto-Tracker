@@ -1,8 +1,16 @@
-#include "../../include/structures/vector.h"
+#include "vector.h"
 
 TradeVector *trade_vector_create(size_t capacity) {
     TradeVector *vector = malloc(sizeof(TradeVector));
+    if (!vector) {
+        fprintf(stderr, "Failed to allocate memory for TradeVector\n");
+        exit(EXIT_FAILURE);
+    }
     vector->trades = malloc(sizeof(Trade) * capacity);
+    if (!vector->trades) {
+        fprintf(stderr, "Failed to allocate memory for TradeVector trades\n");
+        exit(EXIT_FAILURE);
+    }
     vector->capacity = capacity;
     vector->size = 0;
 
@@ -28,11 +36,12 @@ void trade_vector_push(TradeVector *vector, long long ts, double px, double sz) 
     // Resize if needed
     if (vector->size == vector->capacity) {
         size_t new_capacity = vector->capacity * 2;
-        Trade *new_trades = malloc(sizeof(Trade) * new_capacity);
-        for (size_t i = 0; i < vector->size; ++i) {
-            new_trades[i] = vector->trades[i];
+        Trade *new_trades = realloc(vector->trades, sizeof(Trade) * new_capacity);
+        if (!new_trades) {
+            pthread_mutex_unlock(&vector->mutex);
+            fprintf(stderr, "Failed to resize TradeVector\n");
+            exit(EXIT_FAILURE);
         }
-        free(vector->trades);
         vector->trades = new_trades;
         vector->capacity = new_capacity;
     }

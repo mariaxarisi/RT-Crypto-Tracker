@@ -1,4 +1,4 @@
-#include "../../include/metrics/pearson.h"
+#include "pearson.h"
 
 extern const int SYMBOL_COUNT;
 extern const int ONE_MINUTE_MS;
@@ -6,9 +6,9 @@ extern const int BUFFER_SIZE;
 extern volatile int interrupted;
 extern char *symbols[];
 extern long long current_timestamp_ms();
-extern mv_buffer **mv_buf;
+extern MvAvgBuffer **mv_buf;
 
-maxCorr max_pearson_correlation(mv_buffer *mv_buf1, mv_buffer *mv_buf2) {
+maxCorr max_pearson_correlation(MvAvgBuffer *mv_buf1, MvAvgBuffer *mv_buf2) {
 
     int size1 = mv_buf1->count, size2 = mv_buf2->count;
     if(size1 < 8 || size2 < 8){
@@ -22,20 +22,20 @@ maxCorr max_pearson_correlation(mv_buffer *mv_buf1, mv_buffer *mv_buf2) {
     double *mv2 = malloc(8 * sizeof(double));
 
     for(int i=0; i<8; i++){
-        mv1[i] = mv_buffer_get(mv_buf1, size1-1-i).value;
-        mv2[i] = mv_buffer_get(mv_buf2, size2-1-i).value;
+        mv1[i] = mvavg_buffer_get(mv_buf1, size1-1-i).value;
+        mv2[i] = mvavg_buffer_get(mv_buf2, size2-1-i).value;
     }
     double max_correlation = calculate_pearson_correlation(mv1, mv2, 8);
-    long long ts = mv_buffer_get(mv_buf2, size2-1).ts;
+    long long ts = mvavg_buffer_get(mv_buf2, size2-1).ts;
 
     for(int i=1; i<=size2-8; i++){
         for(int j=0; j<8; j++){
-            mv2[j] = mv_buffer_get(mv_buf2, size2-1-i-j).value;
+            mv2[j] = mvavg_buffer_get(mv_buf2, size2-1-i-j).value;
         }
         double correlation = calculate_pearson_correlation(mv1, mv2, 8);
         if(correlation > max_correlation){
             max_correlation = correlation;
-            ts = mv_buffer_get(mv_buf2, size2-1-i).ts;
+            ts = mvavg_buffer_get(mv_buf2, size2-1-i).ts;
         }
     }
 

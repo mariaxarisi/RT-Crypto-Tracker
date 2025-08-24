@@ -1,19 +1,16 @@
-#include "../../include/structures/queue.h"
-
-struct MessageQueue {
-    char **messages;
-    size_t capacity;
-    size_t head;
-    size_t tail;
-    size_t size;
-
-    pthread_mutex_t mutex;
-    pthread_cond_t not_empty;
-};
+#include "queue.h"
 
 MessageQueue *message_queue_create(size_t capacity) {
     MessageQueue *q = malloc(sizeof(MessageQueue));
+    if (!q) {
+        fprintf(stderr, "Failed to allocate memory for MessageQueue\n");
+        exit(EXIT_FAILURE);
+    }
     q->messages = malloc(sizeof(char *) * capacity);
+    if (!q->messages) {
+        fprintf(stderr, "Failed to allocate memory for MessageQueue messages\n");
+        exit(EXIT_FAILURE);
+    }
     q->capacity = capacity;
     q->head = q->tail = q->size = 0;
 
@@ -45,6 +42,10 @@ void message_queue_push(MessageQueue *q, char *message) {
     if (q->size == q->capacity) {
         size_t new_capacity = q->capacity * 2;
         char **new_messages = malloc(sizeof(char *) * new_capacity);
+        if (!new_messages) {
+            fprintf(stderr, "Failed to resize MessageQueue\n");
+            exit(EXIT_FAILURE);
+        }
         for (size_t i = 0; i < q->size; ++i) {
             new_messages[i] = q->messages[(q->head + i) % q->capacity];
         }

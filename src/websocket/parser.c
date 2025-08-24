@@ -1,4 +1,4 @@
-#include "../../include/websocket/parser.h"
+#include "parser.h"
 
 extern const int SYMBOL_COUNT;
 extern volatile int interrupted;
@@ -51,14 +51,14 @@ void parse_trade(const char *json_msg) {
             write_trade(json_string_value(instId), json_string_value(ts),
                         json_string_value(px), json_string_value(sz));
 
-            int i = 0;
+            int i;
             for (i = 0; i < SYMBOL_COUNT; ++i) {
                 if (strcmp(json_string_value(instId), symbols[i]) == 0) {
                     break;
                 }
             }
 
-            // Push trade data to the trade queue
+            // Push trade data to the corresponding trade vector
             long long timestamp = strtoll(json_string_value(ts), NULL, 10);
             double price = strtod(json_string_value(px), NULL);
             double size = strtod(json_string_value(sz), NULL);
