@@ -95,6 +95,10 @@ void *pearson_thread_func(void *arg){
 
             write_pearson(symbols[i], resultTs, symbols[resultSymbol], resultCorr);
         }
+
+        long long delay = current_timestamp_ms() - base_time;
+        write_delay(base_time, delay, 1);
+
         base_time += ONE_MINUTE_MS;
     }
 

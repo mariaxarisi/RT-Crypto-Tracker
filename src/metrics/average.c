@@ -55,6 +55,9 @@ void* average_thread_func(void *arg) {
             calculate_moving_average(i, start);
         }
 
+        long long delay = current_timestamp_ms() - base_time;
+        write_delay(base_time, delay, 0);
+
         base_time += ONE_MINUTE_MS; // Schedule for the next exact minute
     }
 

@@ -30,15 +30,19 @@ void create_empty_file(const char *path) {
 }
 
 void create_files() {
-    const char *directories[] = {"./logs", "./logs/trades", "./logs/average", "./logs/pearson"};
+    const char *directories[] = {"./logs", "./logs/trades", "./logs/average", "./logs/pearson", "./logs/stats"};
 
-    for (size_t i = 0; i < 4; i++) {
+    for (size_t i = 0; i < 5; i++) {
         ensure_directory_exists(directories[i]);
     }
 
-    for (size_t i = 1; i < 4; i++) {
+    for (size_t i = 1; i < 5; i++) {
         clear_directory(directories[i]);
     }
+
+    create_empty_file("./logs/stats/avg-delay.csv");
+    create_empty_file("./logs/stats/pearson-delay.csv");
+    create_empty_file("./logs/stats/cpu-usage.csv");
 
     for (size_t i = 0; i < SYMBOL_COUNT; i++) {
         char path[64];
@@ -86,6 +90,30 @@ void write_pearson(const char *symbol, long long timestamp, const char *related_
     FILE *file = fopen(filename, "a");
     if (file) {
         fprintf(file, "%lld, %s, %.8f\n", timestamp, related_symbol, pearson);
+        fclose(file);
+    } else {
+        fprintf(stderr, "Failed to open file: %s\n", filename);
+    }
+}
+
+void write_delay(long long timestamp, long long delay, char type) {
+    const char *filename = (type == 0) ? "./logs/stats/avg-delay.csv" : "./logs/stats/pearson-delay.csv";
+
+    FILE *file = fopen(filename, "a");
+    if (file) {
+        fprintf(file, "%lld, %lld\n", timestamp, delay);
+        fclose(file);
+    } else {
+        fprintf(stderr, "Failed to open file: %s\n", filename);
+    }
+}
+
+void write_cpu_usage(long long timestamp, double cpu_usage) {
+    const char *filename = "./logs/stats/cpu-usage.csv";
+
+    FILE *file = fopen(filename, "a");
+    if (file) {
+        fprintf(file, "%lld, %.2f\n", timestamp, cpu_usage);
         fclose(file);
     } else {
         fprintf(stderr, "Failed to open file: %s\n", filename);
