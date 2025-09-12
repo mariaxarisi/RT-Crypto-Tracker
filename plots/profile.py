@@ -39,7 +39,7 @@ def load_correlations(symbols, symbol_colors, cur_dir):
 def plot_symbol_correlations(symbol, timestamps_dt, corr_values, matched_colors, occurrences, symbol_colors, cur_dir):
     fig, ax1 = plt.subplots(figsize=(20, 6))
     for i in range(len(timestamps_dt)-1):
-        ax1.plot(timestamps_dt[i:i+2], [1, 1], color=matched_colors[i], linewidth=15)
+        ax1.plot(timestamps_dt[i:i+2], [1, 1], color=matched_colors[i], linewidth=20)
     ax1.set_yticks([])
     ax1.set_xlabel("Time")
     ax1.set_title(f"Correlation Timeline for {symbol}")
@@ -95,7 +95,7 @@ def plot_time_series_with_legend(data_file, output_file, ylabel, scale=1, zoom_y
             values.append(val)
 
     fig, ax = plt.subplots(figsize=(12,6))
-    ax.plot(timestamps, values, marker="o", linestyle="-", label="Delay")
+    ax.plot(timestamps, values, marker="o", linestyle="-")
     ax.set_title(output_file.split("/")[-1].replace("-", " ").replace(".png", "").title())
     ax.set_xlabel("Time")
     ax.set_ylabel(ylabel)
@@ -109,8 +109,6 @@ def plot_time_series_with_legend(data_file, output_file, ylabel, scale=1, zoom_y
     axins.tick_params(labelsize=8)
     axins.set_xticks([])
     axins.set_xlabel("")
-
-    ax.legend(loc="upper left")
 
     plt.tight_layout()
     plt.savefig(output_file)
