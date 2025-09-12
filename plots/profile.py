@@ -79,6 +79,44 @@ def plot_time_series(data_file, output_file, ylabel, scale=1):
     plt.savefig(output_file)
     plt.close()
 
+def plot_time_series_with_legend(data_file, output_file, ylabel, scale=1, zoom_ylim=(0, 5)):
+    from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+    
+    timestamps, values = [], []
+    with open(data_file, "r") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            ts, val = line.split(",")
+            ts = datetime.fromtimestamp(int(ts)/1000)
+            val = float(val)/scale
+            timestamps.append(ts)
+            values.append(val)
+
+    fig, ax = plt.subplots(figsize=(12,6))
+    ax.plot(timestamps, values, marker="o", linestyle="-", label="Delay")
+    ax.set_title(output_file.split("/")[-1].replace("-", " ").replace(".png", "").title())
+    ax.set_xlabel("Time")
+    ax.set_ylabel(ylabel)
+    ax.grid(True)
+    ax.set_ylim(zoom_ylim)
+    
+    axins = inset_axes(ax, width="30%", height="30%", loc="upper right")
+    axins.plot(timestamps, values, marker="o", linestyle="-")
+    axins.set_ylim(min(values), max(values))
+    axins.set_title("Full range", fontsize=8)
+    axins.tick_params(labelsize=8)
+    axins.set_xticks([])
+    axins.set_xlabel("")
+
+    ax.legend(loc="upper left")
+
+    plt.tight_layout()
+    plt.savefig(output_file)
+    plt.close()
+
+
 # -------------------------
 # Main execution
 # -------------------------
@@ -99,16 +137,16 @@ for i, symbol in enumerate(symbols):
     plot_symbol_correlations(symbol, ts_day, corr_day, colors_day, occurrences[i], symbol_colors, cur_dir)
 
 # Plot average delay
-plot_time_series(os.path.join(cur_dir,"../logs/stats/avg-delay.csv"),
-                 os.path.join(cur_dir,"../assets/mv-average-thread-delay.png"),
-                 ylabel="Delay (sec)",
-                 scale=1000)
+plot_time_series_with_legend(os.path.join(cur_dir,"../logs/stats/avg-delay.csv"),
+                                os.path.join(cur_dir,"../assets/mv-average-thread-delay.png"),
+                                ylabel="Delay (sec)",
+                                scale=1000)
 
 # Plot CPU usage
-plot_time_series(os.path.join(cur_dir,"../logs/stats/cpu-usage.csv"),
-                 os.path.join(cur_dir,"../assets/CPU-usage.png"),
-                 ylabel="Usage (%)",
-                 scale=1)
+plot_time_series_with_legend(os.path.join(cur_dir,"../logs/stats/cpu-usage.csv"),
+                                os.path.join(cur_dir,"../assets/CPU-usage.png"),
+                                ylabel="Usage (%)",
+                                scale=1, zoom_ylim=(0, 10))
 
 # Plot Pearson delay
 plot_time_series(os.path.join(cur_dir,"../logs/stats/pearson-delay.csv"),
